@@ -185,10 +185,7 @@ public class Login extends JFrame {
 				/*
 				 * open mail client here
 				 */
-				JFrame frame = new JFrame("this is test");
-				frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-				frame.setSize(200, 200);
-				frame.setVisible(true);
+				new Main_GUI().setVisible(true);
 				
 				
 				this.dispose();
