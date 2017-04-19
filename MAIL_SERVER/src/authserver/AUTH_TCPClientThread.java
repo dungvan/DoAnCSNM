@@ -34,10 +34,14 @@ public class AUTH_TCPClientThread extends Thread {
 		while (!socket.isClosed()) {
 			try {
 				line = reader.readLine();
-				System.out.println(line);
+				/*
+				 * if line.equals("auth login") do check authentication login
+				 */
 				if (line.toLowerCase().equals("auth login")) {
 					line = reader.readLine();
-					System.out.println(line);
+					/*
+					 * send true to client if usermane and password match with db
+					 */
 					if (Account_Server.Authentication(line)) {
 						output.write("true\n".getBytes());
 
@@ -45,6 +49,9 @@ public class AUTH_TCPClientThread extends Thread {
 						output.close();
 						socket.close();
 					} else {
+						/*
+						 * send false to client if username and password match with db
+						 */
 						output.write("false\n".getBytes());
 
 						reader.close();
@@ -52,14 +59,33 @@ public class AUTH_TCPClientThread extends Thread {
 						socket.close();
 					}
 				} else if (line.toLowerCase().equals("create")) {
-					if (Account_Server.userIsExist(reader.readLine().trim().split(" ")[0])) {
-						output.write("false\n".getBytes());
+					/*
+					 * if line.equals("create") do create acount
+					 */
+					line = reader.readLine();
+					if (Account_Server.userIsExist(line.trim().split(" ")[0])) {
+						/*
+						 * send exist to cllient if username is exist in db
+						 */
+						output.write("exist\n".getBytes());
 
 						reader.close();
 						output.close();
 						socket.close();
-					} else {
+					} else if(Account_Server.CreateAccount(line)){
+						/*
+						 * send true to client if username dose not exist in db and create new email successfully
+						 */
 						output.write("true\n".getBytes());
+
+						reader.close();
+						output.close();
+						socket.close();
+					}else{
+						/*
+						 * send false to client if can not create email
+						 */
+						output.write("false\n".getBytes());
 
 						reader.close();
 						output.close();

@@ -31,6 +31,8 @@ import javax.swing.SwingConstants;
 import org.netbeans.lib.awtextra.AbsoluteConstraints;
 import org.netbeans.lib.awtextra.AbsoluteLayout;
 
+import connection.ConnectionSocket;
+
 /**
  *
  * @author DungVan
@@ -174,24 +176,26 @@ public class Login extends JFrame {
 		 */
 		try {
 			Socket socket = new Socket("localhost", 3001);
-			OutputStream _out = socket.getOutputStream();
-			BufferedReader _in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			_out.write("auth login\n".getBytes());
-			_out.write((this.tf_email.getText() + " " + this.passField.getText().toString() + "\n").getBytes());
-			if (_in.readLine().equals("true")) {
-				_in.close();
-				_out.close();
-				socket.close();
+			ConnectionSocket conn = new ConnectionSocket(socket);
+			
+			conn.sendMsg("auth login");
+			conn.sendMsg(this.tf_email.getText() + " " + this.passField.getText().toString() + "\n");
+			if (conn.receive().equals("true")) {
+				conn.closeConnection();
 				/*
 				 * open mail client here
 				 */
+				JFrame frame = new JFrame("this is test");
+				frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+				frame.setSize(200, 200);
+				frame.setVisible(true);
+				
+				
 				this.dispose();
 				return;
 			} else {
 				JOptionPane.showMessageDialog(this, "Email or password went wrong!\nPlease try again.");
-				_in.close();
-				_out.close();
-				socket.close();
+				conn.closeConnection();
 				return;
 			}
 		} catch (UnknownHostException e) {
