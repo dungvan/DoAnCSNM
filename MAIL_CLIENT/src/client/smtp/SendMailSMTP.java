@@ -1,71 +1,97 @@
 package client.smtp;
 
-import java.io.*;
-import java.net.*;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+
+import client.connetion.ConnectionSocket;
 
 public class SendMailSMTP {
 
 	Socket smtpSocket = null;
 	OutputStream sockOut = null;
 	InputStream sockIn = null;
+	ConnectionSocket conn = null;
 
 	public void connect(String server, int port) throws Exception {
 		smtpSocket = new Socket(server, port);
-		sockOut = smtpSocket.getOutputStream();
-		sockIn = smtpSocket.getInputStream();
+		conn = new ConnectionSocket(smtpSocket);
 	}
 
 	// Sending e-mail
-	public void command() {
+	public boolean command(String mailfrom, String mailto, String subject, String data) {
+
 		try {
-			byte[] readbytes = new byte[1024];
-			int num = sockIn.read(readbytes);
-			System.out.println(new String(readbytes, 0, num));
-			Scanner scan = new Scanner(System.in);
-			String response = "";
-			System.out.println("Command here : \n");
-			do {
-				/*
-				 * send ccommand
-				 */
-				String line = scan.nextLine();
-				sockOut.write((line + "\n").getBytes("UTF-8"));
-				sockOut.flush();
-				readbytes = new byte[1000];
-				num = sockIn.read(readbytes);
-				response = new String(readbytes, 0, num);
-				System.out.print(response);
-				
-				/*
-				 * send data mail
-				 */
-				if (response.trim().startsWith("354")) {
-					do {
-						line = scan.nextLine();
-						sockOut.write((line+"\n").getBytes("UTF-8"));
-						sockOut.flush();
-					} while (!line.equals("."));
-					readbytes = new byte[1000];
-					num = sockIn.read(readbytes);
-					response = new String(readbytes, 0, num);
-					System.out.print(response);
-				}
-				/*
-				 * end send data mail
-				 */
-				
-			} while (!response.toLowerCase().trim().startsWith("251, bye"));
+			String response = conn.receive();
+			System.out.println(response);
+			if (!(response.trim().startsWith("220"))) {
+				conn.closeConnection();
+				return false;
+			}
+			/*
+			 * send command
+			 */
+			conn.sendMsg("HELO");
+			response = conn.receive();
+			System.out.println(response);
+			if (!(response.trim().startsWith("250"))) {
+				conn.closeConnection();
+				return false;
+			}
 
-			sockIn.close();
-			sockOut.close();
-			smtpSocket.close();
+			conn.sendMsg("MAIL FROM: <" + mailfrom + ">");
+			response = conn.receive();
+			System.out.println(response);
+			if (!(response.trim().startsWith("250"))) {
+				conn.closeConnection();
+				return false;
+			}
 
+			conn.sendMsg("RCPT TO: <" + mailto + ">");
+			response = conn.receive();
+			System.out.println(response);
+			if (!(response.trim().startsWith("250"))) {
+				conn.closeConnection();
+				return false;
+			}
+
+			conn.sendMsg("DATA");
+			response = conn.receive();
+			System.out.println(response);
+			if (!(response.trim().startsWith("354"))) {
+				conn.closeConnection();
+				return false;
+			}
+			/*
+			 * send data mail
+			 */
+			conn.sendMsg("Subject: " + subject);
+			conn.sendMsg(data);
+			conn.sendMsg(".");
+			response = conn.receive();
+			System.out.println(response);
+			if (!(response.trim().startsWith("250"))) {
+				conn.closeConnection();
+				return false;
+			}
+			conn.sendMsg("QUIT");
+			response = conn.receive();
+			if (response.trim().startsWith("251")) {
+				conn.closeConnection();
+				return true;
+			}
 		} catch (Exception e) {
-			System.err.println(e);
+			e.printStackTrace();
 		}
+
+		try {
+			conn.closeConnection();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	// Note: we should not use buffering and the method readLine(),

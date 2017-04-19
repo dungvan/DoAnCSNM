@@ -3,7 +3,6 @@ package client.connetion;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
@@ -17,7 +16,7 @@ public class ConnectionSocket {
 		this.socket = socket;
 		try {
 			obj_out = this.socket.getOutputStream();
-			_in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+			_in = new BufferedReader(new InputStreamReader(this.socket.getInputStream(), "UTF-8"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -26,6 +25,7 @@ public class ConnectionSocket {
 	public void sendMsg(String msg) throws IOException{
 		
 		obj_out.write((msg + "\n").getBytes("UTF-8"));
+		obj_out.flush();
 	}
 	
 	public String receive() throws IOException{

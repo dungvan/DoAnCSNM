@@ -48,9 +48,8 @@ public class SMTP_TCPClientThread extends Thread {
 	@Override
 	public void run() {
 		String response = "", data = "", senderName = "", receiverName = "";
-		boolean savemailOk = false;
 		try {
-			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
 			String line = null;
 			if (socket.isConnected()) {
 				System.out.println("connected to " + socket.getInetAddress().getHostAddress());
@@ -66,7 +65,7 @@ public class SMTP_TCPClientThread extends Thread {
 					 */
 					if (line.equals("quit")) {
 						if (state == END_STATE)
-							savemailOk = saveEmail(receiverName, senderName, data);
+							saveEmail(receiverName, senderName, data);
 						System.out.println(line);
 						sendMessage("251, Bye");
 						this.output.close();
@@ -195,7 +194,7 @@ public class SMTP_TCPClientThread extends Thread {
 		FileOutputStream output;
 		try {
 			output = new FileOutputStream(emailFile);
-			output.write(writeToFile.getBytes());
+			output.write(writeToFile.getBytes("UTF-8"));
 			output.flush();
 			output.close();
 			return true;
