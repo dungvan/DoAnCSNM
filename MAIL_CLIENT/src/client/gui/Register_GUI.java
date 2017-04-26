@@ -82,7 +82,7 @@ public class Register_GUI extends javax.swing.JFrame {
 		tf_email.setOpaque(false);
 		getContentPane().add(tf_email, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 160, 150, 30));
 
-		bt_submit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/client/submit.png")));
+		bt_submit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/client/image/register/submit.png")));
 		bt_submit.setBorder(null);
 		bt_submit.addMouseListener(new java.awt.event.MouseAdapter() {
 			public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -91,7 +91,7 @@ public class Register_GUI extends javax.swing.JFrame {
 		});
 		getContentPane().add(bt_submit, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 420, 110, 40));
 
-		bt_cancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/client/cancel.png")));
+		bt_cancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/client/image/register/cancel.png")));
 		bt_cancel.setAutoscrolls(true);
 		getContentPane().add(bt_cancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 420, 110, 40));
 		bt_cancel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -123,7 +123,7 @@ public class Register_GUI extends javax.swing.JFrame {
 		});
 		getContentPane().add(minimize, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 0, 30, 30));
 
-		background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/client/mc_register.png"))); // NOI18N
+		background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/client/image/register/mc_register.png"))); // NOI18N
 		background.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 		getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 300, 500));
 
@@ -223,44 +223,6 @@ public class Register_GUI extends javax.swing.JFrame {
 		this.dispose();
 	}
 
-	/**
-	 * @param args
-	 *            the command line arguments
-	 */
-	public static void main(String args[]) {
-		/* Set the Nimbus look and feel */
-		// <editor-fold defaultstate="collapsed" desc=" Look and feel setting
-		// code (optional) ">
-		/*
-		 * If Nimbus (introduced in Java SE 6) is not available, stay with the
-		 * default look and feel. For details see
-		 * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.
-		 * html
-		 */
-		try {
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					javax.swing.UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		} catch (ClassNotFoundException ex) {
-			java.util.logging.Logger.getLogger(Register_GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (InstantiationException ex) {
-			java.util.logging.Logger.getLogger(Register_GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
-			java.util.logging.Logger.getLogger(Register_GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(Register_GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		}
-
-		/* Create and display the form */
-		java.awt.EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				new Register_GUI().setVisible(true);
-			}
-		});
-	}
 
 	// Variables declaration - do not modify
 	private int posX, posY;

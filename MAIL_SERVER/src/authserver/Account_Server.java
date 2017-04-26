@@ -67,7 +67,7 @@ public class Account_Server {
 		File file = new File("account/userTable.db");
 		try {
 			FileOutputStream wirefile = new FileOutputStream(file, true);
-			wirefile.write(("\n"+user_pass).getBytes());
+			wirefile.write((user_pass+"\n").getBytes());
 			wirefile.close();
 			return true;
 		} catch (FileNotFoundException e) {

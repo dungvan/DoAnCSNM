@@ -3,150 +3,143 @@ package client.pop3;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import client.connetion.ConnectionServerOption;
 import client.connetion.ConnectionSocket;
+import mail.Mail;
 
-public class GetMailPOP3 {
-	Socket pop3Socket = null;
-	OutputStream sockOut = null;
-	InputStream sockIn = null;
+public class GetMailPOP3 extends ConnectionServerOption {
 	ConnectionSocket conn = null;
-
-	public void connect(String server, int port) throws Exception {
-		pop3Socket = new Socket(server, port);
-		conn = new ConnectionSocket(pop3Socket);
-	}
-	public boolean command(String user, String pass) {
-
+	public GetMailPOP3() {
+		Socket socket;
 		try {
-			int numberOfMail=0;
-			//so mail cua user tren server
+			socket = new Socket(SERVER_NAME, SERVER_POP3_PORT);
+			conn = new ConnectionSocket(socket);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public boolean getMail(String user, String pass) {
+		try {
+
 			String response = conn.receive();
 			System.out.println(response);
-			if (!(response.trim().startsWith("+OK"))) {
+			if (!(response.trim().endsWith("OK"))) {
 				conn.closeConnection();
 				return false;
-			}
-			/*
-			 * send command
-			 */
-			conn.sendMsg("USER "+user);
-			response = conn.receive();
-			System.out.println(response);
-			if (!(response.trim().startsWith("+OK"))) {
-				conn.closeConnection();
-				return false;
-			}
-			conn.sendMsg("PASS " +pass);
-			response = conn.receive();
-			System.out.println(response);
-			if (!(response.trim().startsWith("+OK"))) {
-				conn.closeConnection();
-				return false;
-			}
+			} /*
+				 * send command
+				 */
 
+			user = user.split("@")[0];
+			conn.sendMsg("USER " + user);
+			response = conn.receive();
+			System.out.println(response);
+			if (!(response.trim().startsWith("+OK"))) {
+				conn.sendMsg("QUIT");
+				conn.closeConnection();
+				return false;
+			}
+			conn.sendMsg("PASS " + pass);
+			response = conn.receive();
+			System.out.println(response);
+			if (!(response.trim().startsWith("+OK"))) {
+				conn.sendMsg("QUIT");
+				conn.closeConnection();
+				return false;
+			}
 			conn.sendMsg("STAT");
 			response = conn.receive();
 			System.out.println(response);
 			if (!(response.trim().startsWith("+OK"))) {
+				conn.sendMsg("QUIT");
 				conn.closeConnection();
 				return false;
 			}
-			else{
-				try {
-					numberOfMail=Integer.parseInt(response.substring(4, response.substring(4,response.length()).indexOf(" ")+4));
-				   System.out.println("numberOfMail "+numberOfMail);
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-				
-			}
-
-			conn.sendMsg("LIST");
-			response = conn.receive();
-			for(int i=0;i<response.length();i++){
-				if(response.charAt(i)!='.')
-					System.out.print(response.charAt(i));
-				else {
-					System.out.println();
-				}
-			}
-			if (!(response.trim().startsWith("+OK"))) {
-				conn.closeConnection();
-				return false;
-			}
-			/*
-			 * request list of mail and information of them
-			 */
-			for(int i=1;i<=numberOfMail;i++) {
-				conn.sendMsg("RETR "+i);
+			int numberOfMail = Integer.parseInt(response.split(" ")[1].split(" ")[0].trim());
+			if (numberOfMail == 0) {
+				conn.sendMsg("QUIT");
 				response = conn.receive();
 				System.out.println(response);
-				if (!(response.trim().startsWith("+OK"))) {
-					conn.closeConnection();
-					return false;
-				}
-				else {
-					saveIntoMailBox(user,response.substring(4,response.length()));
-					//save content mail into mailbox
-					conn.sendMsg("DELE "+i);
-					//delete mail in db server if take mail successly 
+				conn.closeConnection();
+				return false;
+			}
+			int i = 1;
+			while(numberOfMail-- > 0){
+				conn.sendMsg("RETR " + i);
+				try {
+					Mail mail = (Mail) conn.getObject();
 					response = conn.receive();
 					System.out.println(response);
-					if (!(response.trim().startsWith("+OK"))) {
+					if (mail == null){
+						conn.sendMsg("QUIT");
 						conn.closeConnection();
 						return false;
-					}
-				}
+					}else saveEmail(mail);
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					continue;
+				}							
+				conn.sendMsg("DELE " + i++);
+				response = conn.receive();
+				System.out.println(response);
 			}
-			
+			System.out.println("send QUIT");
 			conn.sendMsg("QUIT");
 			response = conn.receive();
 			System.out.println(response);
-			if (response.trim().startsWith("+OK")) {
-				System.out.println("DONE! close all connection");
-				conn.closeConnection();
-				return true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		try {
 			conn.closeConnection();
+			return true;
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
 	}
-	public boolean saveIntoMailBox(String user, String response) {
-		
-		String folderName = user.split("@")[0].trim();
-		File receiverFolder = new File("Mailbox/" + folderName);
-		receiverFolder.mkdir();
-		//tao folder
 
-		System.out.println(folderName);
-		String[] contentmail=response.split("\\.");
-		String nameMail=contentmail[1].substring(7)+"-"+contentmail[3].substring(9);
-		//name mail in client is sender+subject
+	private static boolean saveEmail(Mail mail) {
+		File dbFolder = new File("db");
+		if (dbFolder.isFile()) {
+			dbFolder.delete();
+		}
+		if (!dbFolder.exists()) {
+			dbFolder.mkdir();
+		}
+		
+		String folderName = mail.getTo().split("@")[0].trim();
+		File receiverFolder = new File("db/" + folderName);
+		receiverFolder.mkdir();
+
+		String subject = mail.getSubject().replace(':', '_').replace('\\', '_')
+				.replace('/', '_').replace('*', '_').replace('|', '_').replace('>', '_').replace('<', '_')
+				.replace('?', '_');
+		// file name can't contain \/:*?<>|
 
 		int count = 0;
 		for (File file : receiverFolder.listFiles()) {
-			if (file.getName().equals(nameMail)) {
+			if (file.getName().equals(subject + "-" + mail.getFrom() + ".email")) {
 				count++;
 			}
 		}
-		File emailFile = new File("Mailbox/" + folderName + "/" +nameMail+ (count == 0 ? "" : ("_" + count)));
-		//tao file
-		String writeToFile = contentmail[0]  + "\n" + contentmail[1] + "\n" + contentmail[2] + "\n" + contentmail[3]+ "\n" + contentmail[4];
-				FileOutputStream output;
+
+		File emailFile = new File("db/" + folderName + "/" + subject + "-" + mail.getFrom() + ""
+				+ (count == 0 ? "" : ("_" + count)) + ".email");
+
+		String writeToFile = mail.getDate() + "\nfrom : " + mail.getFrom() + "\nto : " + mail.getTo() + "\nSubject : "
+				+ mail.getSubject() + "\n" + mail.getContent();
+		FileOutputStream output;
 		try {
 			output = new FileOutputStream(emailFile);
 			output.write(writeToFile.getBytes("UTF-8"));
@@ -158,17 +151,5 @@ public class GetMailPOP3 {
 			return false;
 		}
 	}
-	public ArrayList<String > getAllMail(String user)
-	{
-		ArrayList<String > allmail=new ArrayList<>();
-		File file = new File("Mailbox/" + user.split("@")[0].trim());
-		file.mkdir();
-		if (file.listFiles() == null)
-			System.out.println("null");
-		else {
-			for (File f : file.listFiles())
-				allmail.add(f.getName());
-		}
-		return  allmail;
-	}
+
 }

@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -13,24 +15,27 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import dataserver.MailServerDataOption;
+
 public class SMTP_TCPClientThread extends Thread {
 
-	public static final int EHLO_STATE = 0;
-	public static final int MAIL_FROM_STATE = 1;
-	public static final int RCPT_TO_STATE = 2;
-	public static final int DATA_STATE = 3;
-	public static final int END_STATE = 4;
+	public static final byte EHLO_STATE = 0;
+	public static final byte MAIL_FROM_STATE = 1;
+	public static final byte RCPT_TO_STATE = 2;
+	public static final byte DATA_STATE = 3;
+	public static final byte END_STATE = 4;
 
 	public String clientName;
 	private Socket socket;
-	OutputStream output;
-	BufferedReader reader;
+	private ObjectOutputStream oos;
+	private ObjectInputStream ois;
 	private int state = 0;
 
 	public SMTP_TCPClientThread(Socket socket) {
 		this.socket = socket;
 		try {
-			output = socket.getOutputStream();
+			oos = new ObjectOutputStream(this.socket.getOutputStream());
+			ois = new ObjectInputStream(this.socket.getInputStream());
 		} catch (Exception ex) {
 			Logger.getLogger(SMTP_TCPClientThread.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -38,8 +43,8 @@ public class SMTP_TCPClientThread extends Thread {
 
 	public void sendMessage(String message) {
 		try {
-			output.write((message + "\n").getBytes());
-			output.flush();
+			oos.writeUTF(message);
+			oos.flush();
 		} catch (IOException ex) {
 			Logger.getLogger(SMTP_TCPClientThread.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -49,27 +54,26 @@ public class SMTP_TCPClientThread extends Thread {
 	public void run() {
 		String response = "", data = "", senderName = "", receiverName = "";
 		try {
-			reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-			String line_from_client = null;
+			String line = null;
 			if (socket.isConnected()) {
 				System.out.println("connected to " + socket.getInetAddress().getHostAddress());
-				output.write("220 Server access OK \n".getBytes());
-				output.flush();
+				oos.writeUTF("220 Server access OK");
+				oos.flush();
 			}
 			while (!socket.isClosed()) {
-				line_from_client = reader.readLine();
-				if (line_from_client != null) {
-					line_from_client = line_from_client.toLowerCase().trim();
+				line = ois.readUTF();
+				if (line != null) {
+					line = line.toLowerCase().trim();
 					/*
 					 * if received quit command so close connection
 					 */
-					if (line_from_client.equals("quit")) {
-						if (state == END_STATE){
-							if(saveEmail(receiverName, senderName, data)) System.out.println(line_from_client);}
-						
+					if (line.equals("quit")) {
+						if (state == END_STATE)
+							MailServerDataOption.saveEmail(receiverName, senderName, data);
+						System.out.println(line);
 						sendMessage("251, Bye");
-						this.output.close();
-						this.reader.close();
+						this.oos.close();
+						this.ois.close();
 						this.socket.close();
 						return;
 					}
@@ -79,8 +83,8 @@ public class SMTP_TCPClientThread extends Thread {
 					 */
 					switch (state) {
 					case EHLO_STATE:
-						if (line_from_client.equals("helo") || line_from_client.startsWith("ehlo ")) {
-							System.out.println(line_from_client);
+						if (line.equals("helo") || line.startsWith("ehlo ")) {
+							System.out.println(line);
 							response = "250 hello " + InetAddress.getLocalHost().getHostName() + " ,OK";
 							state++;
 						} else
@@ -88,12 +92,12 @@ public class SMTP_TCPClientThread extends Thread {
 						sendMessage(response);
 						break;
 					case MAIL_FROM_STATE:
-						if (line_from_client.startsWith("mail from: <") && line_from_client.endsWith(">") && !line_from_client.split("<")[1].equals(">")) {
+						if (line.startsWith("mail from: <") && line.endsWith(">") && !line.split("<")[1].equals(">")) {
 							/*
 							 * check sender name is null?
 							 */
-							System.out.println(line_from_client);
-							senderName = line_from_client.split("<")[1].split(">")[0];
+							System.out.println(line);
+							senderName = line.split("<")[1].split(">")[0];
 							response = "250 sender <" + senderName + "> ,OK";
 							/*
 							 * insert code to check validate sender name here
@@ -104,13 +108,13 @@ public class SMTP_TCPClientThread extends Thread {
 						sendMessage(response);
 						break;
 					case RCPT_TO_STATE:
-						if (line_from_client.startsWith("rcpt to: <") && line_from_client.trim().endsWith(">")
-								&& !line_from_client.split("<")[1].equals(">")) {
+						if (line.startsWith("rcpt to: <") && line.trim().endsWith(">")
+								&& !line.split("<")[1].equals(">")) {
 							/*
 							 * check receiver name is null?
 							 */
-							System.out.println(line_from_client);
-							receiverName = line_from_client.split("<")[1].split(">")[0];
+							System.out.println(line);
+							receiverName = line.split("<")[1].split(">")[0];
 							response = "250 receiver <" + receiverName + "> ,OK";
 							/*
 							 * insert code check validate receiver name here
@@ -121,19 +125,19 @@ public class SMTP_TCPClientThread extends Thread {
 						sendMessage(response);
 						break;
 					case DATA_STATE:
-						if (line_from_client.equals("data")) {
-							System.out.println(line_from_client);
-							response = "354 Send message, end with a \".\" on a line_from_client by itself";
+						if (line.equals("data")) {
+							System.out.println(line);
+							response = "354 Send message, end with a \".\" on a line by itself";
 							sendMessage(response);
 							/*
 							 * start to get DATA here
 							 */
 							data = "";
-							line_from_client = reader.readLine();
-							while (!line_from_client.equals(".")) {
-								System.out.println(line_from_client);
-								data += line_from_client + "\n";
-								line_from_client = reader.readLine();
+							line = ois.readUTF();
+							while (!line.equals(".")) {
+								System.out.println(line);
+								data += line + "\n";
+								line = ois.readUTF();
 							}
 							/*
 							 * got DATA
@@ -157,52 +161,4 @@ public class SMTP_TCPClientThread extends Thread {
 		}
 	}
 
-	private boolean saveEmail(String receiverName, String senderName, String data) {
-
-		String folderName = receiverName.split("@")[0].trim();
-		File receiverFolder = new File("db/" + folderName);
-		receiverFolder.mkdir();
-		//tao folder
-
-		String subject = "no subject";
-		int indexSubject_start;
-		if ((indexSubject_start = data.toLowerCase().lastIndexOf("subject: ")) >= 0) {
-			int indexSubject_end;
-			indexSubject_end = data.substring(indexSubject_start, data.length() - 1).indexOf("\n");
-			subject = data.substring(indexSubject_start, indexSubject_end).toLowerCase().replaceFirst("subject: ", "")
-					.replace(':', '_').replace('\\', '_').replace('/', '_').replace('*', '_').replace('|', '_')
-					.replace('>', '_').replace('<', '_').replace('?', '_');
-			// file name can't contain \/:*?<>|
-		}
-
-		int count = 0;
-		for (File file : receiverFolder.listFiles()) {
-			if (file.getName().equals(subject + "-" + senderName + ".email")) {
-				count++;
-			}
-		}
-
-		File emailFile = new File("db/" + folderName + "/" + subject + "-" + senderName + ""
-				+ (count == 0 ? "" : ("_" + count)) + ".email");
-		//tao file
-
-		Date current = new Date();
-
-		String pattern = "EEE, dd MMM yyyy HH:mm:ss Z";
-		SimpleDateFormat format = new SimpleDateFormat(pattern);
-		String dateStr = format.format(current);
-
-		String writeToFile = dateStr + "\nfrom : " + senderName + "\nto : " + receiverName + "\n" + data;
-		FileOutputStream output;
-		try {
-			output = new FileOutputStream(emailFile);
-			output.write(writeToFile.getBytes("UTF-8"));
-			output.flush();
-			output.close();
-			return true;
-		} catch (Exception ex) {
-			Logger.getLogger(SMTP_TCPClientThread.class.getName()).log(Level.SEVERE, null, ex);
-			return false;
-		}
-	}
 }

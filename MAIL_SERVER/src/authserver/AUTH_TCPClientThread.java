@@ -1,28 +1,37 @@
 package authserver;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import dataserver.Account_Server;
 import smtpserver.SMTP_TCPClientThread;
 
 public class AUTH_TCPClientThread extends Thread {
 
 	public String clientName;
 	private Socket socket;
-	OutputStream output;
-	BufferedReader reader;
+	private ObjectOutputStream oos;
+	private ObjectInputStream ois;
 
 	public AUTH_TCPClientThread(Socket socket) {
 		this.socket = socket;
 		try {
-			output = socket.getOutputStream();
-			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			oos = new ObjectOutputStream(this.socket.getOutputStream());
+			ois = new ObjectInputStream(socket.getInputStream());
 		} catch (Exception ex) {
+			Logger.getLogger(SMTP_TCPClientThread.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+
+	public void sendMessage(String message) {
+		try {
+			oos.writeUTF(message);
+			oos.flush();
+		} catch (IOException ex) {
 			Logger.getLogger(SMTP_TCPClientThread.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -33,70 +42,83 @@ public class AUTH_TCPClientThread extends Thread {
 		String line = "";
 		while (!socket.isClosed()) {
 			try {
-				line = reader.readLine();
-				System.out.println(line);
+				line = ois.readUTF().trim();				
 				/*
 				 * if line.equals("auth login") do check authentication login
 				 */
-				if (line.toLowerCase().equals("auth login")) {
-					line = reader.readLine();
-					System.out.println(line);
+				if (line.equals("auth login")) {
+
+					line = ois.readUTF();
+
 					/*
-					 * send true to client if usermane and password match with db
+					 * send true to client if usermane and password match with
+					 * db
 					 */
 					if (Account_Server.Authentication(line)) {
-						output.write("true\n".getBytes());
-
-						reader.close();
-						output.close();
+						sendMessage("true");
+						
+						System.out.println("auth login - accept");
+						
+						ois.close();
+						oos.close();
 						socket.close();
 					} else {
 						/*
-						 * send false to client if username and password match with db
+						 * send false to client if username and password match
+						 * with db
 						 */
-						output.write("false\n".getBytes());
+						sendMessage("false");
 
-						reader.close();
-						output.close();
+						System.out.println("auth login - not accept");
+						
+						ois.close();
+						oos.close();
 						socket.close();
 					}
-				} else if (line.toLowerCase().equals("create")) {
+				} else if (line.equals("create")) {
 					/*
-					 *create acount
+					 * if line.equals("create") do create acount
 					 */
-					line = reader.readLine();
-					System.out.println(line);
-					if (Account_Server.userIsExist(line.trim().split(" ")[0])) {
+					line = ois.readUTF().trim();
+					
+					if (Account_Server.userIsExist(line.split(" ")[0])) {
 						/*
-						 * send exist to client if username is exist in db
+						 * send exist to cllient if username is exist in db
 						 */
-						output.write("exist\n".getBytes());
+						sendMessage("exist");
 
-						reader.close();
-						output.close();
+						System.out.println("create - account existed");
+						
+						ois.close();
+						oos.close();
 						socket.close();
-					} else if(Account_Server.CreateAccount(line)){
+					} else if (Account_Server.CreateAccount(line)) {
 						/*
-						 * send true to client if username dose not exist in db and create new email successfully
+						 * send true to client if username dose not exist in db
+						 * and create new email successfully
 						 */
-						output.write("true\n".getBytes());
+						sendMessage("true");
 
-						reader.close();
-						output.close();
+						System.out.println("create - successfully");
+						
+						ois.close();
+						oos.close();
 						socket.close();
-					}else{
+					} else {
 						/*
 						 * send false to client if can not create email
 						 */
-						output.write("false\n".getBytes());
+						sendMessage("false");
 
-						reader.close();
-						output.close();
+						System.out.println("create - not success");
+						
+						ois.close();
+						oos.close();
 						socket.close();
 					}
 				} else {
-					reader.close();
-					output.close();
+					ois.close();
+					oos.close();
 					socket.close();
 					return;
 				}

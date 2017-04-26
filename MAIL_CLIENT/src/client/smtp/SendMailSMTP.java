@@ -5,23 +5,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import client.connetion.ConnectionServerOption;
 import client.connetion.ConnectionSocket;
 
-public class SendMailSMTP {
+public class SendMailSMTP extends ConnectionServerOption {
 
 	Socket smtpSocket = null;
 	OutputStream sockOut = null;
 	InputStream sockIn = null;
 	ConnectionSocket conn = null;
 
-	public void connect(String server, int port) throws Exception {
-		smtpSocket = new Socket(server, port);
+	public void connect() throws Exception {
+		smtpSocket = new Socket(SERVER_NAME, SERVER_SMTP_PORT);
 		conn = new ConnectionSocket(smtpSocket);
 	}
 
 	// Sending e-mail
-	public boolean command(String mailfrom, String mailto, String subject, String data) {
-
+	public boolean sendMail(String mailfrom, String mailto, String subject, String data) throws Exception {
+		
+		connect();
 		try {
 			String response = conn.receive();
 			System.out.println(response);
@@ -66,7 +68,8 @@ public class SendMailSMTP {
 			/*
 			 * send data mail
 			 */
-			conn.sendMsg("Subject: " + subject);
+			if(subject.equals("")) subject = "no subject";
+			conn.sendMsg("Subject : " + subject);
 			conn.sendMsg(data);
 			conn.sendMsg(".");
 			response = conn.receive();
@@ -78,7 +81,6 @@ public class SendMailSMTP {
 			conn.sendMsg("QUIT");
 			response = conn.receive();
 			if (response.trim().startsWith("251")) {
-				System.out.println("BYE");
 				conn.closeConnection();
 				return true;
 			}
