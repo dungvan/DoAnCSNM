@@ -10,17 +10,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import authserver.AUTH_TCPClientThread;
+import pop3server.POP3_TCPClientThread;
 import smtpserver.SMTP_TCPClientThread;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- *
- * @author Mr_MangCau
- */
 public class MainServer {
 
 	public static void main(String[] args) {
@@ -80,8 +72,22 @@ public class MainServer {
 		smtpTcpMainThread.start();
 
 		Thread pop3TcpMainThread = new Thread() {
+			private ServerSocket server;
 			@Override
 			public void run() {
+				try {
+					server = new ServerSocket(pop3TcpPort);
+					System.out.println("Listening on POP3 TCP port " + pop3TcpPort);
+					while (true) {
+						Socket client = server.accept();
+						POP3_TCPClientThread th = new POP3_TCPClientThread(client);
+						pop3TcpClients.add(th);
+						th.start();
+
+					}
+				} catch (IOException ex) {
+					Logger.getLogger(MainServer.class.getName()).log(Level.SEVERE, null, ex);
+				}
 
 			}
 		};

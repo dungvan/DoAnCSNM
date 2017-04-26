@@ -78,6 +78,7 @@ public class SendMailSMTP {
 			conn.sendMsg("QUIT");
 			response = conn.receive();
 			if (response.trim().startsWith("251")) {
+				System.out.println("BYE");
 				conn.closeConnection();
 				return true;
 			}

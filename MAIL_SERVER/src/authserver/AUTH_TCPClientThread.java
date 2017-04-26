@@ -34,11 +34,13 @@ public class AUTH_TCPClientThread extends Thread {
 		while (!socket.isClosed()) {
 			try {
 				line = reader.readLine();
+				System.out.println(line);
 				/*
 				 * if line.equals("auth login") do check authentication login
 				 */
 				if (line.toLowerCase().equals("auth login")) {
 					line = reader.readLine();
+					System.out.println(line);
 					/*
 					 * send true to client if usermane and password match with db
 					 */
@@ -60,12 +62,13 @@ public class AUTH_TCPClientThread extends Thread {
 					}
 				} else if (line.toLowerCase().equals("create")) {
 					/*
-					 * if line.equals("create") do create acount
+					 *create acount
 					 */
 					line = reader.readLine();
+					System.out.println(line);
 					if (Account_Server.userIsExist(line.trim().split(" ")[0])) {
 						/*
-						 * send exist to cllient if username is exist in db
+						 * send exist to client if username is exist in db
 						 */
 						output.write("exist\n".getBytes());
 

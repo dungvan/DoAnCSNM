@@ -50,23 +50,23 @@ public class SMTP_TCPClientThread extends Thread {
 		String response = "", data = "", senderName = "", receiverName = "";
 		try {
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-			String line = null;
+			String line_from_client = null;
 			if (socket.isConnected()) {
 				System.out.println("connected to " + socket.getInetAddress().getHostAddress());
 				output.write("220 Server access OK \n".getBytes());
 				output.flush();
 			}
 			while (!socket.isClosed()) {
-				line = reader.readLine();
-				if (line != null) {
-					line = line.toLowerCase().trim();
+				line_from_client = reader.readLine();
+				if (line_from_client != null) {
+					line_from_client = line_from_client.toLowerCase().trim();
 					/*
 					 * if received quit command so close connection
 					 */
-					if (line.equals("quit")) {
-						if (state == END_STATE)
-							saveEmail(receiverName, senderName, data);
-						System.out.println(line);
+					if (line_from_client.equals("quit")) {
+						if (state == END_STATE){
+							if(saveEmail(receiverName, senderName, data)) System.out.println(line_from_client);}
+						
 						sendMessage("251, Bye");
 						this.output.close();
 						this.reader.close();
@@ -79,8 +79,8 @@ public class SMTP_TCPClientThread extends Thread {
 					 */
 					switch (state) {
 					case EHLO_STATE:
-						if (line.equals("helo") || line.startsWith("ehlo ")) {
-							System.out.println(line);
+						if (line_from_client.equals("helo") || line_from_client.startsWith("ehlo ")) {
+							System.out.println(line_from_client);
 							response = "250 hello " + InetAddress.getLocalHost().getHostName() + " ,OK";
 							state++;
 						} else
@@ -88,12 +88,12 @@ public class SMTP_TCPClientThread extends Thread {
 						sendMessage(response);
 						break;
 					case MAIL_FROM_STATE:
-						if (line.startsWith("mail from: <") && line.endsWith(">") && !line.split("<")[1].equals(">")) {
+						if (line_from_client.startsWith("mail from: <") && line_from_client.endsWith(">") && !line_from_client.split("<")[1].equals(">")) {
 							/*
 							 * check sender name is null?
 							 */
-							System.out.println(line);
-							senderName = line.split("<")[1].split(">")[0];
+							System.out.println(line_from_client);
+							senderName = line_from_client.split("<")[1].split(">")[0];
 							response = "250 sender <" + senderName + "> ,OK";
 							/*
 							 * insert code to check validate sender name here
@@ -104,13 +104,13 @@ public class SMTP_TCPClientThread extends Thread {
 						sendMessage(response);
 						break;
 					case RCPT_TO_STATE:
-						if (line.startsWith("rcpt to: <") && line.trim().endsWith(">")
-								&& !line.split("<")[1].equals(">")) {
+						if (line_from_client.startsWith("rcpt to: <") && line_from_client.trim().endsWith(">")
+								&& !line_from_client.split("<")[1].equals(">")) {
 							/*
 							 * check receiver name is null?
 							 */
-							System.out.println(line);
-							receiverName = line.split("<")[1].split(">")[0];
+							System.out.println(line_from_client);
+							receiverName = line_from_client.split("<")[1].split(">")[0];
 							response = "250 receiver <" + receiverName + "> ,OK";
 							/*
 							 * insert code check validate receiver name here
@@ -121,19 +121,19 @@ public class SMTP_TCPClientThread extends Thread {
 						sendMessage(response);
 						break;
 					case DATA_STATE:
-						if (line.equals("data")) {
-							System.out.println(line);
-							response = "354 Send message, end with a \".\" on a line by itself";
+						if (line_from_client.equals("data")) {
+							System.out.println(line_from_client);
+							response = "354 Send message, end with a \".\" on a line_from_client by itself";
 							sendMessage(response);
 							/*
 							 * start to get DATA here
 							 */
 							data = "";
-							line = reader.readLine();
-							while (!line.equals(".")) {
-								System.out.println(line);
-								data += line + "\n";
-								line = reader.readLine();
+							line_from_client = reader.readLine();
+							while (!line_from_client.equals(".")) {
+								System.out.println(line_from_client);
+								data += line_from_client + "\n";
+								line_from_client = reader.readLine();
 							}
 							/*
 							 * got DATA
@@ -162,6 +162,7 @@ public class SMTP_TCPClientThread extends Thread {
 		String folderName = receiverName.split("@")[0].trim();
 		File receiverFolder = new File("db/" + folderName);
 		receiverFolder.mkdir();
+		//tao folder
 
 		String subject = "no subject";
 		int indexSubject_start;
@@ -183,6 +184,7 @@ public class SMTP_TCPClientThread extends Thread {
 
 		File emailFile = new File("db/" + folderName + "/" + subject + "-" + senderName + ""
 				+ (count == 0 ? "" : ("_" + count)) + ".email");
+		//tao file
 
 		Date current = new Date();
 
@@ -190,7 +192,7 @@ public class SMTP_TCPClientThread extends Thread {
 		SimpleDateFormat format = new SimpleDateFormat(pattern);
 		String dateStr = format.format(current);
 
-		String writeToFile = dateStr + "\nfrom : " + senderName + "\nto : " + receiverName + "\n\n" + data;
+		String writeToFile = dateStr + "\nfrom : " + senderName + "\nto : " + receiverName + "\n" + data;
 		FileOutputStream output;
 		try {
 			output = new FileOutputStream(emailFile);
