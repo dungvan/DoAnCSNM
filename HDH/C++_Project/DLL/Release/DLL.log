@@ -1,0 +1,9 @@
+﻿  stdafx.cpp
+  DLL.cpp
+  dllmain.cpp
+     Creating library C:\Users\DungVan\Documents\Visual Studio 2010\Projects\DoAnCSNM\Release\DLL.lib and object C:\Users\DungVan\Documents\Visual Studio 2010\Projects\DoAnCSNM\Release\DLL.exp
+  Generating code
+  All 362 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  DLL.vcxproj -> C:\Users\DungVan\Documents\Visual Studio 2010\Projects\DoAnCSNM\Release\DLL.dll
+  DLL.vcxproj -> C:\Users\DungVan\Documents\Visual Studio 2010\Projects\DoAnCSNM\Release\DLL.pdb (Full PDB)

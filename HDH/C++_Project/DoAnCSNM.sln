@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DLL", "DLL\DLL.vcxproj", "{A6C1880E-DA13-4256-9E70-F612CD7CB17D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "custardapple", "HOOK\HOOK.vcxproj", "{B724F5E1-F2EE-4A4C-98EA-BC723DC9394F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A6C1880E-DA13-4256-9E70-F612CD7CB17D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A6C1880E-DA13-4256-9E70-F612CD7CB17D}.Debug|Win32.Build.0 = Debug|Win32
+		{A6C1880E-DA13-4256-9E70-F612CD7CB17D}.Debug|Win32.Deploy.0 = Debug|Win32
+		{A6C1880E-DA13-4256-9E70-F612CD7CB17D}.Release|Win32.ActiveCfg = Release|Win32
+		{A6C1880E-DA13-4256-9E70-F612CD7CB17D}.Release|Win32.Build.0 = Release|Win32
+		{B724F5E1-F2EE-4A4C-98EA-BC723DC9394F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B724F5E1-F2EE-4A4C-98EA-BC723DC9394F}.Debug|Win32.Build.0 = Debug|Win32
+		{B724F5E1-F2EE-4A4C-98EA-BC723DC9394F}.Debug|Win32.Deploy.0 = Debug|Win32
+		{B724F5E1-F2EE-4A4C-98EA-BC723DC9394F}.Release|Win32.ActiveCfg = Release|Win32
+		{B724F5E1-F2EE-4A4C-98EA-BC723DC9394F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
