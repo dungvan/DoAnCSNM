@@ -5,9 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.Socket;
-
-import client.connetion.ConnectionServerOption;
-import client.connetion.ConnectionSocket;
+import client.connection.*;
 
 public class SendMailSMTP extends ConnectionServerOption{
 
@@ -23,7 +21,10 @@ public class SendMailSMTP extends ConnectionServerOption{
 
 	// Sending e-mail
 	public boolean sendMail(String mailfrom, String mailto, String subject, String data) throws Exception {
-		
+		if(data.trim().startsWith("Subject : ")){
+			subject = data.trim().split("\n")[0].split("subject : ")[1];
+			data = data.trim().split("\n")[1];
+		}
 		connect();
 		try {
 			String response = conn.receive();

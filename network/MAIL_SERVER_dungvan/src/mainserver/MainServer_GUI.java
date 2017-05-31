@@ -37,6 +37,9 @@ import smtpserver.SMTP_TCPClientThread;
  */
 public class MainServer_GUI extends JFrame {
 
+	public static final String SERVER_CUSTARDAPPLE = "custardapple.ddns.net";
+	public static final String SERVER_BANANA = "bananatieu.ddns.net";
+	public static String SERVER_NAME = "localhost";
 	private ServerSocket server_smtp, server_pop3, server_auth;
 	Thread smtpTcpMainThread, pop3TcpMainThread, authTcpMainThread;
 
@@ -77,21 +80,18 @@ public class MainServer_GUI extends JFrame {
 		ta_showconnection.setEditable(false);
 		ta_showconnection.setFont(new Font("Tahoma", 1, 10));
 		jScrollPane1.setViewportView(ta_showconnection);
-		getContentPane().add(jScrollPane1,
-				new AbsoluteConstraints(0, 176, 288, 180));
+		getContentPane().add(jScrollPane1, new AbsoluteConstraints(0, 176, 288, 180));
 
 		ta_showpop3communication.setEditable(false);
 		ta_showpop3communication.setFont(new Font("Tahoma", 1, 10));
 		jScrollPane2.setViewportView(ta_showpop3communication);
-		getContentPane().add(jScrollPane2,
-				new AbsoluteConstraints(290, 176, 273, 180));
+		getContentPane().add(jScrollPane2, new AbsoluteConstraints(290, 176, 273, 180));
 
 		ta_showsmtpcomunication.setEditable(false);
 		ta_showsmtpcomunication.setFont(new Font("Tahoma", 1, 10));
 		jScrollPane3.setViewportView(ta_showsmtpcomunication);
 
-		getContentPane().add(jScrollPane3,
-				new AbsoluteConstraints(290, 2, 273, 170));
+		getContentPane().add(jScrollPane3, new AbsoluteConstraints(290, 2, 273, 170));
 
 		bt_start.setText("<html><b>START</b></html>");
 		bt_start.setFont(new Font("Tahoma", 0, 10));
@@ -100,8 +100,7 @@ public class MainServer_GUI extends JFrame {
 				bt_startActionPerformed(evt);
 			}
 		});
-		getContentPane().add(bt_start,
-				new AbsoluteConstraints(20, 120, 70, -1));
+		getContentPane().add(bt_start, new AbsoluteConstraints(20, 120, 70, -1));
 
 		bt_stop.setText("<html><b>STOP</html></b>");
 		bt_stop.setFont(new Font("Tahoma", 0, 10));
@@ -110,29 +109,22 @@ public class MainServer_GUI extends JFrame {
 				bt_stopActionPerformed(evt);
 			}
 		});
-		getContentPane().add(bt_stop,
-				new AbsoluteConstraints(110, 120, 70, -1));
+		getContentPane().add(bt_stop, new AbsoluteConstraints(110, 120, 70, -1));
 		tf_smtpport.setHorizontalAlignment(JTextField.RIGHT);
-		getContentPane().add(tf_smtpport,
-				new AbsoluteConstraints(150, 20, 72, -1));
+		getContentPane().add(tf_smtpport, new AbsoluteConstraints(150, 20, 72, -1));
 		tf_pop3port.setHorizontalAlignment(JTextField.RIGHT);
-		getContentPane().add(tf_pop3port,
-				new AbsoluteConstraints(150, 50, 72, -1));
+		getContentPane().add(tf_pop3port, new AbsoluteConstraints(150, 50, 72, -1));
 		tf_authport.setHorizontalAlignment(JTextField.RIGHT);
-		getContentPane().add(tf_authport,
-				new AbsoluteConstraints(150, 80, 72, -1));
+		getContentPane().add(tf_authport, new AbsoluteConstraints(150, 80, 72, -1));
 
 		lb_smtpport.setText("SMTP PORT : ");
-		getContentPane().add(lb_smtpport,
-				new AbsoluteConstraints(40, 20, -1, -1));
+		getContentPane().add(lb_smtpport, new AbsoluteConstraints(40, 20, -1, -1));
 
 		lb_pop3port.setText("POP3 PORT : ");
-		getContentPane().add(lb_pop3port,
-				new AbsoluteConstraints(40, 50, -1, -1));
+		getContentPane().add(lb_pop3port, new AbsoluteConstraints(40, 50, -1, -1));
 
 		lb_authport.setText("AUTH PORT : ");
-		getContentPane().add(lb_authport,
-				new AbsoluteConstraints(40, 80, -1, -1));
+		getContentPane().add(lb_authport, new AbsoluteConstraints(40, 80, -1, -1));
 
 		bt_exit.setText("<html><b>EXIT</b></html>");
 		bt_exit.setFont(new Font("Tahoma", 0, 10));
@@ -141,8 +133,7 @@ public class MainServer_GUI extends JFrame {
 				bt_exitActionPerformed(evt);
 			}
 		});
-		getContentPane().add(bt_exit,
-				new AbsoluteConstraints(200, 120, 70, -1));
+		getContentPane().add(bt_exit, new AbsoluteConstraints(200, 120, 70, -1));
 
 		pack();
 		setLocationRelativeTo(null);
@@ -167,8 +158,8 @@ public class MainServer_GUI extends JFrame {
 			JOptionPane.showMessageDialog(this, "Server started!");
 		} catch (NumberFormatException nfe) {
 			JOptionPane.showMessageDialog(this, "Wrong port to start server!");
-			java.util.logging.Logger.getLogger(MainServer_GUI.class.getName())
-					.log(java.util.logging.Level.SEVERE, null, nfe);
+			java.util.logging.Logger.getLogger(MainServer_GUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
+					nfe);
 		}
 	}
 
@@ -197,18 +188,15 @@ public class MainServer_GUI extends JFrame {
 			public void run() {
 				try {
 					server_smtp = new ServerSocket(smtpTcpPort);
-					System.out.println(
-							"Listening on smtp TCP port " + smtpTcpPort);
+					System.out.println("Listening on smtp TCP port " + smtpTcpPort);
 					while (true) {
 						Socket client = server_smtp.accept();
-						SMTP_TCPClientThread th = new SMTP_TCPClientThread(
-								client);
+						SMTP_TCPClientThread th = new SMTP_TCPClientThread(client);
 						smtpTcpClients.add(th);
 						th.start();
 					}
 				} catch (IOException ex) {
-					Logger.getLogger(MainServer_GUI.class.getName())
-							.log(Level.SEVERE, null, ex);
+					Logger.getLogger(MainServer_GUI.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
 		};
@@ -220,18 +208,15 @@ public class MainServer_GUI extends JFrame {
 			public void run() {
 				try {
 					server_pop3 = new ServerSocket(pop3TcpPort);
-					System.out.println(
-							"Listening on pop3 TCP port " + pop3TcpPort);
+					System.out.println("Listening on pop3 TCP port " + pop3TcpPort);
 					while (true) {
 						Socket client = server_pop3.accept();
-						POP3_TCPClientThread th = new POP3_TCPClientThread(
-								client);
+						POP3_TCPClientThread th = new POP3_TCPClientThread(client);
 						pop3TcpClients.add(th);
 						th.start();
 					}
 				} catch (IOException ex) {
-					Logger.getLogger(MainServer_GUI.class.getName())
-							.log(Level.SEVERE, null, ex);
+					Logger.getLogger(MainServer_GUI.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
 		};
@@ -243,18 +228,15 @@ public class MainServer_GUI extends JFrame {
 			public void run() {
 				try {
 					server_auth = new ServerSocket(authTcpPort);
-					System.out.println("Listening on authentication TCP port "
-							+ authTcpPort);
+					System.out.println("Listening on authentication TCP port " + authTcpPort);
 					while (true) {
 						Socket client = server_auth.accept();
-						AUTH_TCPClientThread th = new AUTH_TCPClientThread(
-								client);
+						AUTH_TCPClientThread th = new AUTH_TCPClientThread(client);
 						authTcpClients.add(th);
 						th.start();
 					}
 				} catch (IOException ex) {
-					Logger.getLogger(MainServer_GUI.class.getName())
-							.log(Level.SEVERE, null, ex);
+					Logger.getLogger(MainServer_GUI.class.getName()).log(Level.SEVERE, null, ex);
 				}
 
 			}
@@ -264,7 +246,7 @@ public class MainServer_GUI extends JFrame {
 	}
 
 	public void stopServer() {
-		if (smtpTcpMainThread.isAlive()) {
+		if (smtpTcpMainThread != null && smtpTcpMainThread.isAlive()) {
 			if (!server_smtp.isClosed()) {
 				try {
 					server_smtp.close();
@@ -275,7 +257,7 @@ public class MainServer_GUI extends JFrame {
 			}
 			smtpTcpMainThread.stop();
 		}
-		if (pop3TcpMainThread.isAlive()){
+		if (pop3TcpMainThread != null && pop3TcpMainThread.isAlive()) {
 			if (!server_pop3.isClosed()) {
 				try {
 					server_pop3.close();
@@ -286,7 +268,7 @@ public class MainServer_GUI extends JFrame {
 			}
 			pop3TcpMainThread.stop();
 		}
-		if (authTcpMainThread.isAlive()){
+		if (authTcpMainThread != null && authTcpMainThread.isAlive()) {
 			if (!server_auth.isClosed()) {
 				try {
 					server_auth.close();

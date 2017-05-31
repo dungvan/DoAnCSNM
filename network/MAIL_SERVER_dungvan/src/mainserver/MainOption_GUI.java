@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package client.gui;
+package mainserver;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,8 +11,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.JLabel;
-
-import client.connetion.ConnectionServerOption;
 
 /**
  *
@@ -25,8 +23,8 @@ public class MainOption_GUI extends javax.swing.JFrame {
 	 */
 	public MainOption_GUI() {
 		initComponents();
-		clientOption.add(banana);
-		clientOption.add(custardapple);
+		clientOption.add(custardServ);
+		clientOption.add(bananaServ);
 	}
 
 	/**
@@ -38,12 +36,11 @@ public class MainOption_GUI extends javax.swing.JFrame {
 	// <editor-fold defaultstate="collapsed" desc="Generated Code">
 	private void initComponents() {
 
-		setContentPane(new JLabel(new javax.swing.ImageIcon(getClass().getResource("/client/image/background.jpg"))));
-
 		clientOption = new javax.swing.ButtonGroup();
 		submit = new javax.swing.JButton();
-		banana = new javax.swing.JRadioButton();
-		custardapple = new javax.swing.JRadioButton();
+		custardServ = new javax.swing.JRadioButton();
+		bananaServ = new javax.swing.JRadioButton();
+		serverName = new javax.swing.JTextField();
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setResizable(false);
@@ -59,13 +56,13 @@ public class MainOption_GUI extends javax.swing.JFrame {
 				submitMouseClicked();
 			}
 		});
-		getContentPane().add(submit, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 99, -1, -1));
+		getContentPane().add(submit, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 80, -1, -1));
 
-		banana.setText("bananatieu.ddns.net");
-		getContentPane().add(banana, new org.netbeans.lib.awtextra.AbsoluteConstraints(27, 20, 170, -1));
+		custardServ.setText("custardapple.ddns.net");
+		getContentPane().add(custardServ, new org.netbeans.lib.awtextra.AbsoluteConstraints(27, 20, 170, -1));
 
-		custardapple.setText("custardapple.ddns.net");
-		getContentPane().add(custardapple, new org.netbeans.lib.awtextra.AbsoluteConstraints(27, 50, 170, -1));
+		bananaServ.setText("bananatieu.ddns.net");
+		getContentPane().add(bananaServ, new org.netbeans.lib.awtextra.AbsoluteConstraints(27, 50, 170, -1));
 
 		setSize(new java.awt.Dimension(228, 165));
 		setLocationRelativeTo(null);
@@ -73,17 +70,15 @@ public class MainOption_GUI extends javax.swing.JFrame {
 
 	private void submitMouseClicked() {
 		// TODO add your handling code here:
-		if (banana.isSelected())
-			Client_GUI.setCLIENT_TYPE("bananatieu.ddns.net");
-		else if (custardapple.isSelected())
-			Client_GUI.setCLIENT_TYPE("custardapple.ddns.net");
-		else
-			Client_GUI.setCLIENT_TYPE("localhost");
-		ConnectionServerOption.setSERVER_NAME(Client_GUI.getCLIENT_TYPE());
-
+		if (custardServ.isSelected()) {
+			MainServer_GUI.SERVER_NAME = MainServer_GUI.SERVER_CUSTARDAPPLE;
+		} else if (bananaServ.isSelected()) {
+			MainServer_GUI.SERVER_NAME = MainServer_GUI.SERVER_BANANA;
+		} else
+			MainServer_GUI.SERVER_NAME = "localhost";
 		java.awt.EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				new Login_GUI().setVisible(true);
+				new MainServer_GUI().setVisible(true);
 			}
 		});
 		this.dispose();
@@ -107,8 +102,9 @@ public class MainOption_GUI extends javax.swing.JFrame {
 
 	// Variables declaration - do not modify
 	private javax.swing.ButtonGroup clientOption;
-	private javax.swing.JRadioButton custardapple;
-	private javax.swing.JRadioButton banana;
+	private javax.swing.JRadioButton bananaServ;
+	private javax.swing.JRadioButton custardServ;
+	private javax.swing.JTextField serverName;
 	private javax.swing.JButton submit;
 	// End of variables declaration
 }

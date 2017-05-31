@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import dataserver.Account_Server;
+import mainserver.MainServer_GUI;
 import smtpserver.SMTP_TCPClientThread;
 
 public class AUTH_TCPClientThread extends Thread {
@@ -38,7 +39,10 @@ public class AUTH_TCPClientThread extends Thread {
 
 	@Override
 	public void run() {
-		System.out.println("connected to " + socket.getInetAddress().getHostAddress());
+		String s = "connected to " + socket.getInetAddress().getHostAddress();
+		System.out.println(s);
+		MainServer_GUI.ta_showconnection.append("\n----------------\n"+s+"\n");
+		
 		String line = "";
 		while (!socket.isClosed()) {
 			try {
@@ -120,6 +124,7 @@ public class AUTH_TCPClientThread extends Thread {
 					ois.close();
 					oos.close();
 					socket.close();
+					MainServer_GUI.ta_showconnection.append("close connetion \n----------------\n");
 					return;
 				}
 			} catch (IOException e) {

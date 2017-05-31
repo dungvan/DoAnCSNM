@@ -1,4 +1,4 @@
-package client.connetion;
+package client.connection;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,6 +12,7 @@ public class ConnectionSocket {
 
 	private ObjectOutputStream oos = null;
 	private ObjectInputStream ois = null;
+
 	private Socket socket;
 
 	public ConnectionSocket(Socket socket) {

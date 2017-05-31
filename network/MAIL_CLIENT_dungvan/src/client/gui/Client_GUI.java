@@ -138,7 +138,7 @@ public class Client_GUI extends JFrame {
 		mailbody.setBorder(null);
 		mailbody.setEditable(false);
 		mailbody.setBackground(null);
-//		mailbody.setBackground(new Color(244, 241, 185));
+		mailbody.setBackground(new Color(244, 241, 185));
 
 		jScrollPane.setBorder(null);
 		jScrollPane.setAutoscrolls(false);

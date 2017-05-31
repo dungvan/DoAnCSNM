@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import dataserver.Account_Server;
 import dataserver.MailServerDataOption;
 import mail.Mail;
+import mainserver.MainServer_GUI;
 import smtpserver.SMTP_TCPClientThread;
 
 public class POP3_TCPClientThread extends Thread {
@@ -55,13 +56,16 @@ public class POP3_TCPClientThread extends Thread {
 		String response = "", user = "", password = "";
 		try {
 			if (socket.isConnected()) {
-				System.out.println("connected to " + socket.getInetAddress().getHostAddress());
+				String s = "connected to " + socket.getInetAddress().getHostAddress();
+				System.out.println(s);
+				MainServer_GUI.ta_showpop3communication.append("\n--------------------\n"+s+"\n");
 				sendMessage("220 Server access OK");
 			}
 			String line = null;
 			while (!socket.isClosed()) {
 				line = ois.readUTF();
 				System.out.println(line);
+				MainServer_GUI.ta_showpop3communication.append(line + "\n");
 				if (line != null) {
 					line = line.toLowerCase().trim();
 					/*
@@ -73,9 +77,11 @@ public class POP3_TCPClientThread extends Thread {
 						}
 						state = END_STATE;
 						sendMessage("+OK Sayonara");
+						MainServer_GUI.ta_showpop3communication.append("+OK Sayonara");
 						oos.close();
 						this.ois.close();
 						this.socket.close();
+						MainServer_GUI.ta_showpop3communication.append("close connection\n------------\n");
 						return;
 					}
 					/*
@@ -94,6 +100,7 @@ public class POP3_TCPClientThread extends Thread {
 							response = "-ERR please start like USER username";
 
 						sendMessage(response);
+						MainServer_GUI.ta_showpop3communication.append(response);
 						break;
 
 					case PASSWORD_STATE:
@@ -113,6 +120,7 @@ public class POP3_TCPClientThread extends Thread {
 							state--;
 						}
 						sendMessage(response);
+						MainServer_GUI.ta_showpop3communication.append(response);
 						break;
 
 					case TRANSACTION_STATE:
@@ -124,6 +132,7 @@ public class POP3_TCPClientThread extends Thread {
 							response = "+OK " + listFile.length + " " + MailServerDataOption.getBytes(folder);
 
 							sendMessage(response);
+							MainServer_GUI.ta_showpop3communication.append(response);
 						} else if (line.startsWith("list")) {
 							String listNumber = line.replaceFirst("list", "").trim();
 							if (listNumber.equals("") || listNumber == null) {
@@ -146,6 +155,7 @@ public class POP3_TCPClientThread extends Thread {
 							}
 
 							sendMessage(response);
+							MainServer_GUI.ta_showpop3communication.append(response+"\n");
 
 						} else if (line.startsWith("retr ")) {
 							String number = line.replaceFirst("retr ", "").trim();
@@ -164,7 +174,7 @@ public class POP3_TCPClientThread extends Thread {
 							}
 
 							sendMessage(response);
-
+							MainServer_GUI.ta_showpop3communication.append(response+"\n");
 						} else if (line.startsWith("dele ")) {
 							String number = line.replaceFirst("dele ", "").trim();
 							if (number.equals("") || number == null) {
@@ -173,7 +183,6 @@ public class POP3_TCPClientThread extends Thread {
 								try {
 									int i = Integer.parseInt(number);
 									delete[delCount] = i;
-									System.out.println(delete[delCount]);
 									delCount++;
 									response = "+OK message deleted";
 								} catch (NumberFormatException e) {
@@ -182,12 +191,14 @@ public class POP3_TCPClientThread extends Thread {
 							}
 
 							sendMessage(response);
+							MainServer_GUI.ta_showpop3communication.append(response+"\n");
 
 						} else if (line.equals("rset")) {
 							Arrays.fill(delete, 0);
 							response = "+OK Reset state";
 							state = 0;
 							sendMessage(response);
+							MainServer_GUI.ta_showpop3communication.append(response+"\n");
 						}
 						break;
 					case END_STATE:
